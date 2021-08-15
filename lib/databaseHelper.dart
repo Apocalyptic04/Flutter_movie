@@ -9,7 +9,7 @@ import 'models/movie.dart';
 
 class DatabaseHelper {
 
-  static final _databaseName = "MyDatabase.db";
+  static final _databaseName = "Movies.db";
   static final _databaseVersion = 1;
 
   static final table = 'movies';
@@ -64,7 +64,7 @@ class DatabaseHelper {
   // inserted row.
   Future<int> insert(Map<String, dynamic> row) async {
     Database db = await instance.database;
-    return await db.insert(table, row);
+    return await db.insert(table, row, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // All of the rows are returned as a list of maps, where each map is
@@ -90,6 +90,18 @@ class DatabaseHelper {
   Future<int> queryRowCount() async {
     Database db = await instance.database;
     return Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $table'));
+  }
+
+  Future<Movie> queryMovie(id) async {
+    Database db = await instance.database;
+    var result = await db.query(table, where: '$imdbId = ?', whereArgs: [id]);
+    return Movie(
+        imdbId: result.first["_imdbId"],
+        poster: result.first["poster"],
+        title: result.first["title"],
+        year: result.first["year"],
+        director: result.first["director"],
+    );
   }
 
   // We are assuming here that the id column in the map is set. The other
