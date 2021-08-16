@@ -64,7 +64,8 @@ class _MoviesWidget extends State<MoviesWidget> {
                   return ListTile(
                       title: Row(children: [
                         SizedBox(
-                            width: 100,
+                            height: 200,
+                            width: 115,
                             child: ClipRRect(
                               child: Image.network(movie.poster),
                               borderRadius: BorderRadius.circular(10),
@@ -129,6 +130,33 @@ class SecondRoute2 extends StatelessWidget {
 
 }
 
+class editMovieWidget extends StatelessWidget {
+
+  final String imdbId;
+  final String poster;
+  final String director;
+  final String year;
+  final String title;
+
+  editMovieWidget({this.imdbId,this.director,this.poster,this.title,this.year});
+
+  @override
+  Widget build(BuildContext context) {
+    final appTitle = 'Edit Movie';
+    return MaterialApp(
+      title: appTitle,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(appTitle),
+        ),
+        body: MyEditForm(imdbId : this.imdbId, director: this.director, poster: this.poster, title: this.title, year: this.year),
+      ),
+    );
+  }
+
+}
+
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -144,6 +172,23 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+class MyEditForm extends StatefulWidget {
+
+  final String imdbId;
+  final String poster;
+  final String director;
+  final String year;
+  final String title;
+
+  const MyEditForm({Key key, this.imdbId, this.poster, this.director, this.title, this.year}) : super(key: key);
+
+  @override
+  MyEditFormState createState() {
+    return MyEditFormState(imdbId : this.imdbId, director: this.director, poster: this.poster, title: this.title, year: this.year);
+  }
+}
+
 // Create a Form widget.
 class MyCustomForm extends StatefulWidget {
   @override
@@ -151,6 +196,132 @@ class MyCustomForm extends StatefulWidget {
     return MyCustomFormState();
   }
 }
+
+class MyEditFormState extends State<MyEditForm> {
+
+  final String imdbId;
+  final String poster;
+  final String director;
+  final String year;
+  final String title;
+  // Create a global key that uniquely identifies the Form widget
+  // and allows validation of the form.
+  final _formKey = GlobalKey<FormState>();
+
+
+  MyEditFormState({this.imdbId, this.poster, this.director, this.title, this.year});
+
+  // @override
+  // void dispose() {
+  //   // Clean up the controller when the widget is disposed.
+  //   movieNameController.dispose();
+  //   super.dispose();
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   // Clean up the controller when the widget is disposed.
+  //   directorNameController.dispose();
+  //   super.dispose();
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   // Clean up the controller when the widget is disposed.
+  //   yearController.dispose();
+  //   super.dispose();
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   // Clean up the controller when the widget is disposed.
+  //   imageController.dispose();
+  //   super.dispose();
+  // }
+
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    // Build a Form widget using the _formKey created above.
+    final dbHelper = DatabaseHelper.instance;
+    TextEditingController movieNameController = TextEditingController(text: this.title);
+    TextEditingController directorNameController = TextEditingController(text: this.director);
+    TextEditingController yearController = TextEditingController(text: this.year);
+    TextEditingController imageController = TextEditingController(text: this.poster);
+
+    void _edit(imdb,title,poster,director,year) async {
+      Map<String, dynamic> data =
+      {
+        '_imdbId': imdb,
+        'title': title,
+        'year': year,
+        'poster' : poster,
+        'director' : director,
+      };
+      await dbHelper.insert(data);
+    }
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField(
+            controller: movieNameController,
+            //initialValue: this.title,
+            decoration: const InputDecoration(
+              //icon: const Icon(Icons.person),
+              hintText: 'Enter movie title',
+              labelText: "Movie Title",
+            ),
+          ),
+          TextFormField(
+            controller: directorNameController,
+            //initialValue: this.director,
+            decoration: const InputDecoration(
+              //icon: const Icon(Icons.phone),
+              hintText: 'Enter movie director name',
+              labelText: "Director",
+            ),
+          ),
+          TextFormField(
+            controller: yearController,
+            //initialValue: this.year,
+            decoration: const InputDecoration(
+              //icon: const Icon(Icons.calendar_today),
+              hintText: 'Enter Movie Year',
+              labelText: "Year",
+            ),
+          ),
+          TextFormField(
+            controller: imageController,
+            //initialValue: this.poster,
+            decoration: const InputDecoration(
+              //icon: const Icon(Icons.calendar_today),
+              hintText: 'Enter Image URL',
+              labelText: "Poster Link",
+            ),
+          ),
+          new Container(
+              padding: const EdgeInsets.only(left: 150.0, top: 40.0),
+              child: new ElevatedButton(
+                child: const Text('Submit'),
+                onPressed: () {
+                  _edit(this.imdbId,movieNameController.text, imageController.text, directorNameController.text, yearController.text);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MoviesWidget()),
+                  );
+                },
+              )),
+        ],
+      ),
+    );
+  }
+}
+
 // Create a corresponding State class. This class holds data related to the form.
 class MyCustomFormState extends State<MyCustomForm> {
   // Create a global key that uniquely identifies the Form widget
@@ -251,7 +422,10 @@ class MyCustomFormState extends State<MyCustomForm> {
                 child: const Text('Submit'),
                 onPressed: () {
                   _insert(movieNameController.text, imageController.text, directorNameController.text, yearController.text);
-                  return MyApp();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MoviesWidget()),
+                  );
                 },
               )),
         ],

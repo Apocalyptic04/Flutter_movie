@@ -55,6 +55,7 @@ Future<String> signInWithGoogle() async {
 }
 
 Future<void> signOutGoogle() async {
+
   await googleSignIn.signOut();
 
   print("User Signed Out");

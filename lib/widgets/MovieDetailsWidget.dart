@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hello_movies/models/movie.dart';
 
 import '../databaseHelper.dart';
+import 'moviesWidget.dart';
 
 class MovieDetailsWidget extends StatefulWidget {
 
@@ -22,11 +23,28 @@ class _MovieDetailsWidget extends State<MovieDetailsWidget> {
   Movie movie;
   final dbHelper = DatabaseHelper.instance;
 
+  void handleClick(String value) {
+    switch (value) {
+      case 'Edit':
+        break;
+      case 'Settings':
+        break;
+    }
+  }
+
   void _query() async {
     final _movie = await dbHelper.queryMovie(this.imdbId);
     setState(() {
       movie = _movie;
     });
+  }
+
+  void _delete(id) async {
+    await dbHelper.delete(id);
+  }
+
+  void _edit(id) async {
+    //await dbHelper.edit(id);
   }
 
   @override
@@ -47,6 +65,23 @@ class _MovieDetailsWidget extends State<MovieDetailsWidget> {
       return new Scaffold(
         appBar: new AppBar(
           title: new Text(movie.title),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.create), onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => editMovieWidget(imdbId : movie.imdbId, director: movie.director, poster: movie.poster, title: movie.title, year: movie.year)),
+              );
+            }),
+            IconButton(icon: Icon(Icons.delete), onPressed: () {
+               //print("Aakash Bhagat");
+              _delete(movie.imdbId);
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (context) => MoviesWidget()),
+               );
+               //return MoviesWidget();
+            }),
+          ],
         ),
         body: Align(
           alignment: Alignment(0, -0.4),
@@ -54,7 +89,8 @@ class _MovieDetailsWidget extends State<MovieDetailsWidget> {
           //alignment: Alignment(0, -1.7),
           child: Stack(
             children: [new SizedBox(
-                width: 200,
+                height: 250,
+                width: 150,
                 child: ClipRRect(
                   child: Image.network(movie.poster),
                   borderRadius: BorderRadius.circular(10),
